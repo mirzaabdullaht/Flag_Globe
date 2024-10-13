@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FlagGlobe - Country Info</title>
+    <style>
+        /* Base styles */
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f7fa;
+            color: #333;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        header {
+            background-color: #4a90e2;
+            color: #fff;
+            padding: 15px 20px;
+            text-align: center;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background: white;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        h1, h2 {
+            margin: 0 0 10px;
+        }
+        p {
+            margin: 10px 0;
+        }
+
+        /* Form styles */
+        input[type="text"], select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus {
+            border-color: #4a90e2;
+            outline: none;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4a90e2;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #007bff;
+        }
+
+        /* Sections */
+        .section {
+            margin-top: 20px;
+        }
+        .result, .quiz, .cultural-insights {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+
+        /* Dark mode styles */
+        body.dark-mode {
+            background-color: #333;
+            color: #4a90e2;
+        }
+        body.dark-mode header {
+            background-color: #222;
+        }
+        body.dark-mode .result, body.dark-mode .quiz, body.dark-mode .cultural-insights {
+            background-color:  #444;
+            border: 1px solid #333;
+            color: #ffffff; /* Text color in dark mode */
+        }
+        body.dark-mode input[type="text"], body.dark-mode select {
+            background-color: #555;
+            color: #f9f9f9;
+            border: 1px solid #666;
+        }
+        body.dark-mode .section h2 {
+            color: #4a90e2; /* Improved visibility for section headings */
+        }
+
+        .theme-toggle {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+
+    </style>
+</head>
+<body>
+    <header>
+        <h1>FlagGlobe - Country Information</h1>
+    </header>
+
+    <div class="container">
+        <div class="theme-toggle">
+            <button id="toggle-theme">Switch to Dark Mode</button>
+        </div>
+
+        <div class="section">
+            <label for="action-select"><strong>Select Action:</strong></label>
+            <select id="action-select">
+                <option value="" disabled selected>Select an option</option>
+                <option value="get-info">Get Country Info</option>
+                <option value="compare-countries">Compare Two Countries</option>
+                <option value="quiz">Take a Quiz</option>
+                <option value="cultural-insights">Cultural Insights</option>
+            </select>
+        </div>
+
+        <!-- Get Country Info Section -->
+        <div id="get-info-section" class="section" style="display: none;">
+            <h2>Get Country Info</h2>
+            <input type="text" id="country" placeholder="Enter Country Name" required>
+            <button id="get-info">Get Info</button>
+            <div class="result" id="result"></div>
+        </div>
+
+        <!-- Compare Two Countries Section -->
+        <div id="compare-section" class="section" style="display: none;">
+            <h2>Compare Two Countries</h2>
+            <input type="text" id="country1" placeholder="Enter First Country Name" required>
+            <input type="text" id="country2" placeholder="Enter Second Country Name" required>
+            <button id="compare-countries">Compare</button>
+            <div class="result" id="comparison-result"></div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div id="quiz-section" class="section" style="display: none;">
+            <h2>Take a Quiz</h2>
+            <button id="start-quiz">Start Quiz</button>
+            <div class="quiz" id="quiz-result">Quiz feature is not yet implemented.</div> <!-- Placeholder message -->
+        </div>
+
+        <!-- Cultural Insights Section -->
+        <div id="cultural-insights-section" class="section" style="display: none;">
+            <h2>Cultural Insights</h2>
+            <button id="get-cultural-insights">Get Cultural Insights</button>
+            <div class="cultural-insights" id="cultural-insights-result">
+                Cultural Insights feature is not yet implemented.
+            </div> <!-- Placeholder message -->
+        </div>
+    </div>
+
+    <script>
+        async function fetchCountryInfo(country) {
+            const response = await fetch('/get_country', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ country })
+            });
+            return response.json();
+        }
+
+        async function fetchCulturalInsights(country) {
+            const response = await fetch('/get_cultural_insights', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({ country })
+            });
+            return response.json();
+        }
+
+        document.getElementById('action-select').onchange = function() {
+            const selectedAction = this.value;
+
+            // Hide all sections initially
+            document.getElementById('get-info-section').style.display = 'none';
+            document.getElementById('compare-section').style.display = 'none';
+            document.getElementById('quiz-section').style.display = 'none';
+            document.getElementById('cultural-insights-section').style.display = 'none';
+
+            // Show the selected section
+            if (selectedAction === 'get-info') {
+                document.getElementById('get-info-section').style.display = 'block';
+            } else if (selectedAction === 'compare-countries') {
+                document.getElementById('compare-section').style.display = 'block';
+            } else if (selectedAction === 'quiz') {
+                document.getElementById('quiz-section').style.display = 'block';
+                document.getElementById('quiz-result').innerHTML = '<p>Quiz feature is not yet implemented.</p>'; // Placeholder message
+            } else if (selectedAction === 'cultural-insights') {
+                document.getElementById('cultural-insights-section').style.display = 'block';
+            }
+        };
+
+        document.getElementById('get-info').onclick = async () => {
+            const country = document.getElementById('country').value;
+            const data = await fetchCountryInfo(country);
+
+            let resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = `<h2>${data.name}</h2>
+                <img src="${data.flag}" alt="Flag of ${data.name}" class="demo-flag">
+                <p><strong>Capital:</strong> ${data.capital}</p>
+                <p><strong>Population:</strong> ${data.population}</p>
+                <p><strong>Region:</strong> ${data.region}</p>
+                <p><strong>Languages:</strong> ${data.languages}</p>
+                <h3>Wikipedia Articles:</h3>
+                ${data.wikipedia_info.map(article => `
+                    <div class="article">
+                        <a href="${article.url}" target="_blank">${article.title}</a>
+                        <p>${article.snippet}</p>
+                    </div>
+                `).join('')}`;
+        };
+
+        document.getElementById('compare-countries').onclick = async () => {
+            const country1 = document.getElementById('country1').value;
+            const country2 = document.getElementById('country2').value;
+
+            const data1 = await fetchCountryInfo(country1);
+            const data2 = await fetchCountryInfo(country2);
+
+            let comparisonDiv = document.getElementById('comparison-result');
+            comparisonDiv.innerHTML = `<h2>Comparison: ${data1.name} vs ${data2.name}</h2>
+                <div>
+                    <p><strong>${data1.name}:</strong></p>
+                    <img src="${data1.flag}" alt="Flag of ${data1.name}" class="demo-flag">
+                    <p>Capital: ${data1.capital}</p>
+                    <p>Population: ${data1.population}</p>
+                    <p>Region: ${data1.region}</p>
+                    <p>Languages: ${data1.languages}</p>
+                </div>
+                <div>
+                    <p><strong>${data2.name}:</strong></p>
+                    <img src="${data2.flag}" alt="Flag of ${data2.name}" class="demo-flag">
+                    <p>Capital: ${data2.capital}</p>
+                    <p>Population: ${data2.population}</p>
+                    <p>Region: ${data2.region}</p>
+                    <p>Languages: ${data2.languages}</p>
+                </div>
+            `;
+        };
+
+        document.getElementById('get-cultural-insights').onclick = async () => {
+            const country = document.getElementById('country').value;
+            const insights = await fetchCulturalInsights(country);
+
+            let insightsDiv = document.getElementById('cultural-insights-result');
+            insightsDiv.innerHTML = `<h3>Cultural Insights for ${country}</h3>
+                <p><strong>Traditions:</strong> ${insights.traditions.join(', ')}</p>
+                <p><strong>Foods:</strong> ${insights.foods.join(', ')}</p>
+                <p><strong>Facts:</strong> ${insights.facts.join(', ')}</p>`;
+        };
+
+        document.getElementById('toggle-theme').onclick = function() {
+            document.body.classList.toggle('dark-mode');
+            this.textContent = document.body.classList.contains('dark-mode') ? 'Switch to Light Mode' : 'Switch to Dark Mode';
+        };
+    </script>
+</body>
+</html>
+
